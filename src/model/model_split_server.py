@@ -101,7 +101,7 @@ class SplitServerModel:
         OUT_QUEUE.put(data)
         CONDITION.notify()
 
-        CONDITION.release()
+        # CONDITION.release()
 
         return self.build_prompt()
 
