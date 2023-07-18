@@ -560,10 +560,7 @@ class GLMBlock(torch.nn.Module):
             num_attention_heads,
             layernorm_epsilon,
             layer_id,
-            model_dir: str,
-            in_queue: Queue,
-            out_queue: Queue,
-            skip: bool,
+            mid_layer,
             inner_hidden_size=None,
             hidden_size_per_attention_head=None,
             layernorm=LayerNorm,
@@ -610,10 +607,7 @@ class GLMBlock(torch.nn.Module):
             empty_init=empty_init
         )
 
-        if not skip:
-            self.split_server_layer = SplitServerLayer(model_dir, in_queue, out_queue)
-        else:
-            self.split_server_layer = nn.Identity()
+        self.split_server_layer = mid_layer
 
     def forward(
             self,
@@ -810,7 +804,7 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
     `encoder_hidden_states` is then expected as an input to the forward pass.
     """
 
-    def __init__(self, config: ChatGLMConfig, model_dir: str, in_queue: Queue, out_queue: Queue, empty_init=True):
+    def __init__(self, config: ChatGLMConfig, model_dir: str, empty_init=True):
         super().__init__(config)
         if empty_init:
             init_method = skip_init
@@ -837,16 +831,13 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
         )
         self.gradient_checkpointing = False
 
-        def get_layer(layer_id, skip):
+        def get_layer(layer_id, mid_layer):
             return GLMBlock(
                 self.hidden_size,
                 self.num_attention_heads,
                 self.layernorm_epsilon,
                 layer_id,
-                model_dir,
-                in_queue,
-                out_queue,
-                skip,
+                mid_layer,
                 inner_hidden_size=self.inner_hidden_size,
                 hidden_size_per_attention_head=self.hidden_size_per_attention_head,
                 layernorm=LayerNorm,
@@ -858,8 +849,8 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
 
         self.layers = torch.nn.ModuleList(
             # [get_layer(layer_id, skip=True) for layer_id in range(self.num_layers)]
-            [get_layer(layer_id, False) for layer_id in range(1)] +
-            [get_layer(layer_id, True) for layer_id in range(1, self.num_layers)] # TODO change the number of split layers
+            [get_layer(layer_id, SplitServerLayer(model_dir)) for layer_id in range(1)] +
+            [get_layer(layer_id, nn.Identity()) for layer_id in range(1, self.num_layers)] # TODO change the number of split layers
         )
 
         # Final layer norm before output.
@@ -1046,7 +1037,7 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
 
 
 class ChatGLMForConditionalGeneration(ChatGLMPreTrainedModel):
-    def __init__(self, config: ChatGLMConfig, model_dir: str, in_queue: Queue, out_queue: Queue, empty_init=True):
+    def __init__(self, config: ChatGLMConfig, model_dir: str, empty_init=True):
         super().__init__(config)
         if empty_init:
             init_method = skip_init
@@ -1060,7 +1051,7 @@ class ChatGLMForConditionalGeneration(ChatGLMPreTrainedModel):
 
         self.position_encoding_2d = config.position_encoding_2d
 
-        self.transformer = ChatGLMModel(config, model_dir, in_queue, out_queue, empty_init=empty_init)
+        self.transformer = ChatGLMModel(config, model_dir, empty_init=empty_init)
 
         self.lm_head = init_method(
             nn.Linear,

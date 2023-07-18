@@ -9,14 +9,15 @@ from tqdm import tqdm
 
 from model.chatglm_6b_split_server import ChatGLMTokenizer, ChatGLMConfig, ChatGLMForConditionalGeneration
 
+from helper import IN_QUEUE, OUT_QUEUE, CONDITION
+
 tokenizer_config_path = os.path.join('model', 'chatglm_6b_split_server', 'tokenizer_config.json')
 model_config_path = os.path.join('model', 'chatglm_6b_split_server', 'config.json')
 token_text_path = os.path.join("..", "tmp", "server", "ice_text.model")
 model_state_dict_file_num = 8
 
 class SplitServerModel:
-    def __init__(self, model_dir: str = None, in_queue: Queue = None,
-                 out_queue: Queue = None):  # FIXME FOR TEST USE ONLY, can not be none
+    def __init__(self, model_dir: str = None):  # FIXME FOR TEST USE ONLY, can not be none
         if model_dir:  # FIXME FOR TEST USE ONLY, never load from server path
             model_dir = os.path.join("..", "tmp", "server")
 
@@ -33,7 +34,7 @@ class SplitServerModel:
             config_dict = json.load(config_file)
 
         configuration = ChatGLMConfig(**config_dict)
-        model = ChatGLMForConditionalGeneration(configuration, model_dir, in_queue, out_queue)
+        model = ChatGLMForConditionalGeneration(configuration, model_dir)
 
         # Empty dict to accumulate the state dicts from all files
         state_dict_all = {}
@@ -56,9 +57,6 @@ class SplitServerModel:
         self.history = []
         self.count = 0
 
-        self.in_queue = in_queue
-        self.out_queue = out_queue
-
     def build_prompt(self) -> str:
         # prompt = "Welcome to the ChatGLM-6B model. Type your message."
         prompt = ""
@@ -68,10 +66,10 @@ class SplitServerModel:
         return prompt
 
     def process(self) -> str:
-        while self.in_queue.empty():
-            pass
-        print("Received")
-        data = self.in_queue.get()
+        CONDITION.acquire()
+        CONDITION.wait()
+        print("[MODEL]: Input query received")
+        data = IN_QUEUE.get()
         # print(repr(serialized_data))
         query = pickle.loads(data["byte_data"])
 
@@ -81,29 +79,29 @@ class SplitServerModel:
                 self.history = []
             self.count += 1
 
-            print(response)
+            print(f"[HISTORY]: {response}")
 
-            print("Sending current result back")
-            while not self.out_queue.empty():
-                pass
+            print("[MODEL]: Sending current result back")
             # pickle the tensor data
             serialized_data = pickle.dumps(response)
             # Send the result to the server
             data = {"byte_data": serialized_data, "stage": "forward"}
-            self.out_queue.put(data)
+            OUT_QUEUE.put(data)
+            CONDITION.notify()
 
-        while self.in_queue.empty():
-            pass
-        self.in_queue.get()
+            # Waiting to start next iter
+            CONDITION.wait()
+            IN_QUEUE.get()
 
-        print("Sending None as ending.")
-        while not self.out_queue.empty():
-            pass
+        print("[MODEL]: Sending None as ending.")
         # pickle the tensor data
         serialized_data = pickle.dumps(None)
         # Send the result to the server
         data = {"byte_data": serialized_data, "stage": "forward"}
-        self.out_queue.put(data)
+        OUT_QUEUE.put(data)
+        CONDITION.notify()
+
+        CONDITION.release()
 
         return self.build_prompt()
 
