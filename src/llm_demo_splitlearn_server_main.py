@@ -15,7 +15,7 @@ from transformers import AutoTokenizer, AutoModel
 
 from model import SplitServerModel
 from model.chatglm_6b_split_server import ChatGLMForConditionalGeneration, ChatGLMTokenizer, ChatGLMConfig
-from splitlearn import SplitClient, SplitServer
+from splitlearn import SplitServer
 
 
 def main():

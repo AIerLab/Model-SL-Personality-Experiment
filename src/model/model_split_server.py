@@ -11,7 +11,7 @@ from model.chatglm_6b_split_server import ChatGLMTokenizer, ChatGLMConfig, ChatG
 
 tokenizer_config_path = os.path.join('model', 'chatglm_6b_split_server', 'tokenizer_config.json')
 model_config_path = os.path.join('model', 'chatglm_6b_split_server', 'config.json')
-token_text_path = os.path.join("..", "tmp", "client", "ice_text.model")
+token_text_path = os.path.join("..", "tmp", "server", "ice_text.model")
 model_state_dict_file_num = 8
 
 class SplitServerModel:

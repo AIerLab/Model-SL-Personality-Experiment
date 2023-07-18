@@ -16,6 +16,8 @@ class SplitServerLayer(AbstractModel):
         self.last_layer = last_layer
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        device = x.device
+        
         if not self.first_layer:
             while not self.out_queue.empty():
                 sleep(0.1)
@@ -37,7 +39,7 @@ class SplitServerLayer(AbstractModel):
             data = self.in_queue.get()
             # print(repr(serialized_data))
             x = pickle.loads(data["byte_data"])
-            x.to(self.device)
+            x.to(device)
 
         return x
 
