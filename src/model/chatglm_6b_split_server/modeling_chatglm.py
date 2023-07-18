@@ -849,8 +849,8 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
 
         self.layers = torch.nn.ModuleList(
             # [get_layer(layer_id, skip=True) for layer_id in range(self.num_layers)]
-            [get_layer(layer_id, SplitServerLayer(model_dir)) for layer_id in range(1)] +
-            [get_layer(layer_id, nn.Identity()) for layer_id in range(1, self.num_layers)] # TODO change the number of split layers
+            [get_layer(layer_id, SplitServerLayer(model_dir)) for layer_id in range(0)] +
+            [get_layer(layer_id, nn.Identity()) for layer_id in range(0, self.num_layers)] # TODO change the number of split layers
         )
 
         # Final layer norm before output.
