@@ -619,11 +619,16 @@ class GLMBlock(torch.nn.Module):
             use_cache: bool = False,
             output_attentions: bool = False,
     ):
+        tranfer_dict = dict(hidden_states = hidden_states, position_ids = position_ids,
+                            attention_mask = attention_mask, layer_id = layer_id, 
+                            layer_past = layer_past, use_cache = use_cache,
+                            output_attentions = output_attentions)
+
         """
         hidden_states: [seq_len, batch, hidden_size]
         attention_mask: [(1, 1), seq_len, seq_len]
         """
-        hidden_states = self.split_server_layer(hidden_states)
+        hidden_states = self.split_server_layer(tranfer_dict)
 
         # Layer norm at the begining of the transformer layer.
         # [seq_len, batch, hidden_size]
