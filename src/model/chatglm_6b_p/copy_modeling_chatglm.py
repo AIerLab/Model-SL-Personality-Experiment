@@ -32,7 +32,7 @@ from transformers.generation.logits_process import LogitsProcessor
 from transformers.generation.utils import LogitsProcessorList, StoppingCriteriaList, GenerationConfig, ModelOutput
 
 from .configuration_chatglm import ChatGLMConfig
-from ..layer_split_server import SplitServerLayer
+# from ..layer_split_server import SplitServerLayer
 
 # flags required to enable jit fusion kernels
 
@@ -560,7 +560,6 @@ class GLMBlock(torch.nn.Module):
             num_attention_heads,
             layernorm_epsilon,
             layer_id,
-            mid_layer,
             inner_hidden_size=None,
             hidden_size_per_attention_head=None,
             layernorm=LayerNorm,
@@ -607,7 +606,6 @@ class GLMBlock(torch.nn.Module):
             empty_init=empty_init
         )
 
-        self.split_server_layer = mid_layer
 
     def forward(
             self,
@@ -619,17 +617,10 @@ class GLMBlock(torch.nn.Module):
             use_cache: bool = False,
             output_attentions: bool = False,
     ):
-        tranfer_dict = dict(hidden_states = hidden_states, position_ids = position_ids,
-                            attention_mask = attention_mask, layer_id = layer_id, 
-                            layer_past = layer_past, use_cache = use_cache,
-                            output_attentions = output_attentions)
-
         """
         hidden_states: [seq_len, batch, hidden_size]
         attention_mask: [(1, 1), seq_len, seq_len]
         """
-        hidden_states = self.split_server_layer(tranfer_dict)
-
         # Layer norm at the begining of the transformer layer.
         # [seq_len, batch, hidden_size]
         attention_input = self.input_layernorm(hidden_states)

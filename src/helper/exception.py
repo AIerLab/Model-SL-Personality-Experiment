@@ -1,3 +1,0 @@
-class NoneException(BaseException):
-    pass
-

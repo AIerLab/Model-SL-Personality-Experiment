@@ -1,3 +1,2 @@
-from .model_abstract import AbstractModel
-from .layer_split_server import SplitServerLayer
+from .chatglm_6b_split_server.layer_split_server import SplitServerLayer
 from .model_split_server import SplitServerModel
