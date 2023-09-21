@@ -11,6 +11,7 @@ from queue import Queue
 import torch
 import torch.utils.checkpoint
 import torch.nn.functional as F
+import torch.nn.init as init
 from torch import nn
 from torch.nn import CrossEntropyLoss, LayerNorm
 from torch.nn.utils import skip_init
@@ -92,25 +93,33 @@ class IdentityMappingModule(nn.Module):
         # Define a sequence of layers: zero-initialized linear layer, GLM block, and another zero-initialized linear layer
         self.zerolinear1 = ZeroLinearBatchNorm(in_features, hidden_features)
         self.glmblock = GLMBlock(configuration.hidden_size, configuration.num_attention_heads, 
-                                 configuration.layernorm_epsilon, None, configuration)
+                                configuration.layernorm_epsilon, None, configuration, empty_init=False)
+        
         self.zerolinear2 = ZeroLinearBatchNorm(hidden_features, in_features)
 
     def forward(self, x_dict):
+        # for p in self.parameters():
+        #     p.requires_grad = True
+            
         # Extract the 'hidden_states' tensor from the input dictionary
-        x_input = x_dict["hidden_states"]
-        
+        x_input = x_dict["hidden_states"].clone() #  TODO test
         # Print the shape of the input tensor for debugging purposes
-        # print(f"[DEBUG]: x_input shape: {x_input.shape}")
+        #print(f"[DEBUG]: x_input shape: {x_input.shape}")
 
         # Apply the first zero-initialized linear layer followed by batch normalization
         out = self.zerolinear1(x_input)  
         
         # Update the 'hidden_states' in the dictionary and apply the GLM block
         x_dict["hidden_states"] = out
+        # print(f"[DEBUG]: output: {out}")
+
         out = self.glmblock(**x_dict)[0]
+        
+        #print(f"[DEBUG]: output shape: {out.shape}")
 
         # Apply the second zero-initialized linear layer followed by batch normalization
         out = self.zerolinear2(out)
+        #print(f"[DEBUG]: output shape: {out.shape}")
         
         # Print the output tensor added to the input tensor (skip connection) for debugging purposes
         # print(f"[DEBUG]: forward result: {out+x_input}")
@@ -922,8 +931,8 @@ class ChatGLMModel(ChatGLMPreTrainedModel):
         self.layers = torch.nn.ModuleList(
             # [get_layer(layer_id, skip=True) for layer_id in range(self.num_layers)]
             # [get_layer(layer_id, SplitServerLayer()) for layer_id in range(5)] +
-            # [get_layer(layer_id, IdentityMappingModule(4096, 4096)) for layer_id in range(5)] +
-            [get_layer(layer_id, nn.Identity()) for layer_id in range(0, self.num_layers)] # TODO change the number of split layers
+            [get_layer(layer_id, IdentityMappingModule(4096, 4096)) for layer_id in range(1)] + 
+            [get_layer(layer_id, nn.Identity()) for layer_id in range(1, self.num_layers)] # TODO change the number of split layers
         )
 
         # Final layer norm before output.

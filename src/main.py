@@ -60,7 +60,7 @@ def main():
         model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     training_args.local_rank = -1
-    training_args.layers_to_freeze = [i for i in range(8, 28)]
+    training_args.layers_to_freeze = [i for i in range(0, 28)]
     training_args.dynamic_freeze = {}
     training_args.hook_layers = [0,1,2,3]
     
@@ -355,7 +355,7 @@ def main():
     )
     
     #freeze layers
-    freeze_layers(model, training_args.layers_to_freeze)
+    freeze_layers(model, training_args.layers_to_freeze) # TODO Select the layers needed to be freezed
     
     # Register hooks
     register_hooks(model, training_args.hook_layers)
