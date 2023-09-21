@@ -11,27 +11,41 @@ This guide provides a brief overview of the Model-SL-Personality-Experiment for 
 ### Execution
 
 1. Navigate to the `ptuning` directory: `cd ptuning`
-2. Edit the `train.sh` and `evaluate.sh` script as needed.
-3. Run the training script: `bash train.sh`
-4. Post-training, run the evaluation: `bash evaluate.sh`
+2. To adjust training and evaluation configurations, edit the `pthning_config.sh` file.
+3. Run the training script: 
+    ```bash
+    bash train.sh
+    ```
+4. Post-training, run the evaluation: 
+    ```bash
+    bash evaluate.sh
+    ```
+
+### Web Demo
+
+For inference and to view the results of your training, execute: 
+```
+bash web_demo.sh
+```
 
 ## Model Modifications
 
-### `modeling_chatglm.py`
-This file contains the `IdentityMappingModule`. If you wish to change the location or behavior of the module, make the necessary modifications here.
+### Modeling Changes
+In `modeling_chatglm.py`, the `IdentityMappingModule` provides functionalities related to identity mappings in the model. You can change its location or behavior according to your requirements.
 
-### `utility.py` & `trainer.py`
-Both files provide utilities for freezing the model. If you require any changes related to model freezing, refer to these files.
+### Freezing Utilities
+The files `utility.py` and `trainer.py` are equipped with the necessary tools and methods to handle freezing operations on the model. If you need to make any adjustments or implement additional functionalities related to model freezing, these are the go-to files.
 
 ## Navigating the Codebase
 
-- **TODO Labels**: Look for the `TODO` labels within the code. These are places where some action or enhancement is needed but hasn't been completed yet.
-- **FIXME Labels**: Search for `FIXME` labels. These indicate parts of the code that have known issues or bugs that need fixing.
+- **TODO Labels**: Look for the `TODO` labels within the code. These markers indicate segments where further action or enhancement is anticipated but hasn't been addressed yet.
+
+- **FIXME Labels**: Search for `FIXME` labels. These highlight sections of the code that have known issues or anomalies requiring fixes.
 
 ## Contribution
 
-Ensure you test your modifications thoroughly before committing. This will ensure the stability and efficiency of the Model-SL-Personality-Experiment.
+Before pushing any modifications, ensure thorough testing to guarantee the stability and efficiency of the Model-SL-Personality-Experiment.
 
 ---
 
-Use tools like `grep` or your IDE's search function to quickly navigate to `TODO` and `FIXME` labels. These labels will assist in identifying areas of the codebase that require attention.
+For a swift codebase traversal, use tools like `grep` or your IDE's search functionality. Searching for the `TODO` and `FIXME` labels will quickly lead you to the sections needing attention.
