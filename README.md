@@ -1,53 +1,37 @@
-# Model-SL-Cloud
-Artificial Intelligence Data Encryption and Model Personalisation Framework based on Federated Learning and Split Learning.
+# Model-SL-Personality-Experiment Documentation
 
-## Start
+This guide provides a brief overview of the Model-SL-Personality-Experiment for developers.
 
-```bash
-cd src
-python main.py
-```
+## Setup
+### Prerequisites
 
-## Introduction
+1. **Checkpoints**: Download official checkpoints and place them in the `chatglm_6b` folder.
+2. **Datasets**: Acquire necessary datasets and move them to the `data` folder.
 
-A project that can encrypt cloud model user input with trained local model layers. The architecture we choose is Micro-service.
+### Execution
 
-TODO more details
+1. Navigate to the `ptuning` directory: `cd ptuning`
+2. Edit the `train.sh` and `evaluate.sh` script as needed.
+3. Run the training script: `bash train.sh`
+4. Post-training, run the evaluation: `bash evaluate.sh`
 
-## Project Index
+## Model Modifications
 
-1. Project Structure: [src/README.md](src/README.md)
-2. Federated Learning: [src/fedlearn/README.md](src/fedlearn/README.md)
-3. Split Learning: [src/splitlearn/README.md](src/splitlearn/README.md)
+### `modeling_chatglm.py`
+This file contains the `IdentityMappingModule`. If you wish to change the location or behavior of the module, make the necessary modifications here.
 
-## Licensing & Contribution
+### `utility.py` & `trainer.py`
+Both files provide utilities for freezing the model. If you require any changes related to model freezing, refer to these files.
 
-This project is licensed under the [Apache-2.0](LICENSE) license. We welcome contributions and improvements to the project. 
+## Navigating the Codebase
 
-Please look at the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details.
+- **TODO Labels**: Look for the `TODO` labels within the code. These are places where some action or enhancement is needed but hasn't been completed yet.
+- **FIXME Labels**: Search for `FIXME` labels. These indicate parts of the code that have known issues or bugs that need fixing.
 
-## Citation Info
+## Contribution
 
-TODO pending for update
-
-## Group Contact
-
-For any questions or issues, please open a GitHub issue. We'll respond as soon as possible.
+Ensure you test your modifications thoroughly before committing. This will ensure the stability and efficiency of the Model-SL-Personality-Experiment.
 
 ---
 
-_Maintained by AierLab, an open-source group._
-
-🤖GitHub discussions: [Disscussions](https://github.com/orgs/AierLab/discussions)
-🌸QQ chat group：[兔叽の魔术工房](https://jq.qq.com/?_wv=1027&k=EaGddTQg) (942848525)
-⭐Bilibili：[白拾Official](https://space.bilibili.com/98639326)
-
-
-
-   
-
-
-
-   
-  
-
+Use tools like `grep` or your IDE's search function to quickly navigate to `TODO` and `FIXME` labels. These labels will assist in identifying areas of the codebase that require attention.

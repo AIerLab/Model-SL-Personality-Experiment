@@ -1,2 +1,0 @@
-from .chatglm_6b_split_server.layer_split_server import SplitServerLayer
-from .model_split_server import SplitServerModel

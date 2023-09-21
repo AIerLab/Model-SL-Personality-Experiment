@@ -163,3 +163,7 @@ cython_debug/
 client
 server
 redundant
+output/*
+data/*
+nohup.out
+chatglm_6b/*.bin

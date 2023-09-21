@@ -54,7 +54,7 @@ CHATGLM_6B_PRETRAINED_MODEL_ARCHIVE_LIST = [
 ]
 
 # Define the path to the model configuration JSON file
-model_config_path = os.path.join('/home/project-1/yanghaobo/PrivataCloudModel/src/model/chatglm_6b_p/config.json')
+model_config_path = os.path.join('/home/project-1/yanghaobo/Model-SL-Personality-Experiment/chatglm_6b/config.json') # TODO update to a config path file
 
 # Open the configuration file and load it into a Python dictionary
 with open(model_config_path) as config_file:
